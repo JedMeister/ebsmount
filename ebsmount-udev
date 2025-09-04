@@ -19,6 +19,7 @@
 
 import re
 import os
+import sys
 import argparse
 
 import ebsmount_lib as ebsmount
@@ -66,19 +67,22 @@ def main() -> None:
     if not devname:
         raise parser.error("DEVNAME is required")
 
-    # it seems that these may not be needed?!
-    # if not devpath:
-    #    raise parser.error('PHYSDEVPATH or DEVPATH is required')
+    if not devpath:
+       raise parser.error('PHYSDEVPATH or DEVPATH is required')
 
-    # if not _expected_devpath(devpath, config.devpaths.split()):
-    #    raise parser.error(
-    #            'PHYSDEVPATH/DEVPATH is not of the expected structure')
+    if not _expected_devpath(devpath, config.devpaths.split()):
+       raise parser.error(
+               'PHYSDEVPATH/DEVPATH is not of the expected structure')
 
     # log trigger
     log(devname, f"received {args.action} trigger")
-    func = getattr(ebsmount, "ebsmount_" + args.action)
-    func(devname, config.mountdir)
-
+    if args.action == "add":
+        ebsmount.ebsmount_add(devname, config.mountdir)
+    elif args.action == "remove":
+        ebsmount.ebsmount_remove(devname, config.mountdir)
+    else:
+        print(f"unexpected action {args.action}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
