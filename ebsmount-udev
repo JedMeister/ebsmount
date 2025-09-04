@@ -19,7 +19,6 @@
 
 import re
 import os
-import sys
 import argparse
 
 import ebsmount_lib as ebsmount
@@ -38,7 +37,7 @@ OpenStack   DEVNAME         /dev/vda
 """
 
 
-def _expected_devpath(devpath, devpaths):
+def _expected_devpath(devpath: str, devpaths: str) -> bool:
     for pattern in devpaths:
         if re.search(pattern, devpath):
             return True
@@ -46,7 +45,7 @@ def _expected_devpath(devpath, devpaths):
     return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         prog="ebsmount-udev",

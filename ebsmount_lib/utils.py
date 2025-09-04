@@ -15,15 +15,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import subprocess
 from subprocess import PIPE, STDOUT
+from typing import ClassVar, NoReturn
 
 from conffile import ConfFile
 
 
 class EBSMountConf(ConfFile):
     CONF_FILE = "/etc/ebsmount.conf"
-    REQUIRED = [
+    REQUIRED: ClassVar[list[str]] = [
         "enabled",
         "runhooks",
         "mountdir",
@@ -37,19 +39,19 @@ class EBSMountConf(ConfFile):
 config = EBSMountConf()
 
 
-def log(devname, s):
-    entry = f"{devname}: {s}"
+def log(devname: str, msg: str) -> None:
+    entry = f"{devname}: {msg}"
     with open(config.logfile, "a") as fob:
         fob.write(entry + "\n")
     print(entry)
 
 
-def fatal(s):
-    print("error: " + str(s), file=sys.stderr)
+def fatal(msg: str) -> NoReturn:
+    print(f"error: {msg}", file=sys.stderr)
     sys.exit(1)
 
 
-def mkdir_parents(path, mode=0o777):
+def mkdir_parents(path: str, mode: int = 0o777) -> None:
     """mkdir 'path' recursively (I.e., equivalent to mkdir -p)"""
     dirs = path.split("/")
     for i in range(2, len(dirs) + 1):
@@ -60,7 +62,7 @@ def mkdir_parents(path, mode=0o777):
         os.mkdir(dir, mode)
 
 
-def is_mounted(path):
+def is_mounted(path: str) -> bool:
     """test if path is mounted"""
     with open("/proc/mounts") as fob:
         mounts = fob.read()
@@ -69,7 +71,7 @@ def is_mounted(path):
     return False
 
 
-def mount(devpath, mountpath, options=""):
+def mount(devpath: str, mountpath: str, options: str = "") -> None:
     """mount devpath to mountpath with specified options (creates mountpath)"""
     if not os.path.exists(mountpath):
         mkdir_parents(mountpath)

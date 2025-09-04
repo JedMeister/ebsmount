@@ -21,17 +21,17 @@ from subprocess import PIPE, STDOUT
 class Device:
     """class to hold device information enumerated from udev database"""
 
-    def __init__(self, s, volinfo=True):
+    def __init__(self, s: str, volinfo: bool = True) -> None:
         self.path = ""
         self.name = ""
-        self.symlinks = []
-        self.env = {}
+        self.symlinks: list[str] = []
+        self.env: dict[str, str] = {}
 
         self._parse_raw_data(s)
         if volinfo:
             self._get_volinfo()
 
-    def _parse_raw_data(self, s):
+    def _parse_raw_data(self, s: str) -> None:
         for entry in s.splitlines():
             type, value = entry.split(":", 1)
             type = type.strip()
@@ -53,7 +53,7 @@ class Device:
                 name, val = value.split("=", 1)
                 self.env[name] = val.lstrip("=")
 
-    def _get_volinfo(self):
+    def _get_volinfo(self) -> None:
         if "DEVTYPE" in self.env and self.env["DEVTYPE"] == "disk":
             proc = subprocess.run(
                 ["blkid", "-o", "udev", f"/dev/{self.name}"],
@@ -75,7 +75,7 @@ class Device:
                 self.env[name] = val
 
 
-def query(device=None, volinfo=True):
+def query(device: str | None = None, volinfo: bool = True) -> list[Device]:
     """query udev database and return device(s) information
     if no device is specified, all devices will be returned
     optionally query volume info (vol_id) on disk devices
@@ -93,7 +93,7 @@ def query(device=None, volinfo=True):
     return devices
 
 
-def _disk_devices():
+def _disk_devices() -> None:
     """debug/test method to print disk devices"""
     devices = query()
     for dev in devices:

@@ -19,7 +19,6 @@
 
 import re
 import os
-import sys
 import argparse
 import subprocess
 from subprocess import PIPE, STDOUT
@@ -28,7 +27,7 @@ import ebsmount_lib as ebsmount
 from ebsmount_lib.utils import fatal, config, is_mounted
 
 
-def _expected_devpath(devname, devpaths):
+def _expected_devpath(devname: str, devpaths: str) -> bool:
     """ugly hack to test expected structure of devpath"""
     raw_output = subprocess.run(
         ["udevadm", "info", "-a", "-n", devname],
@@ -49,7 +48,7 @@ def _expected_devpath(devname, devpaths):
     return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         prog="ebsmount-manual",
         description=(
@@ -71,9 +70,9 @@ def main():
     args = parser.parse_args()
     filesystem = args.filesystem
     if not os.path.exists(args.devname):
-        raise parser.error(f"{devname} does not exist")
+        raise parser.error(f"{args.devname} does not exist")
 
-    if not _expected_devpath(devname, config.devpaths.split()):
+    if not _expected_devpath(args.devname, config.devpaths.split()):
         raise parser.error(
             "devpath not of expected structure, or failed lookup"
         )

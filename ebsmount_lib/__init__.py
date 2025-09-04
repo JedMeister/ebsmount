@@ -16,7 +16,6 @@
 
 import os
 
-# XXX TODO may need additional imports below (moving from importing *)
 from os.path import join, basename, exists
 import subprocess
 from subprocess import STDOUT, PIPE
@@ -27,7 +26,7 @@ from .udevdb import query
 from .utils import config, log, is_mounted, mount
 
 
-def ebsmount_add(devname, mountdir):
+def ebsmount_add(devname: str, mountdir: str) -> None:
     """ebs device attached"""
 
     matching_devices = []
@@ -82,7 +81,8 @@ def ebsmount_add(devname, mountdir):
                     or not os.stat(fpath).st_gid == 0
                 ):
                     log(
-                        devname, f"skipping hook: '{file}', not owned root:root"
+                        devname,
+                        f"skipping hook: '{file}', not owned root:root"
                     )
                     continue
 
@@ -95,10 +95,12 @@ def ebsmount_add(devname, mountdir):
                     stdout=PIPE,
                     check=True,
                 )
-                subprocess.run(["tee", "-a", config.logfile], input=proc.stdout)
+                subprocess.run(
+                        ["tee", "-a", config.logfile], input=proc.stdout
+                )
 
 
-def ebsmount_remove(devname, mountdir):
+def ebsmount_remove(devname: str, mountdir: str) -> None:
     """ebs device detached"""
 
     mounted = False
