@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 # XXX TODO may need additional imports below (moving from importing *)
 from os.path import join, basename, exists
 import subprocess
@@ -35,21 +36,24 @@ def ebsmount_add(devname, mountdir):
             matching_devices.append(device)
 
     for device in matching_devices:
-        devpath = join('/dev', device.name)
-        mountpath = join(mountdir, device.env.get(
-            'ID_FS_UUID', devpath[-1])[:6])
+        devpath = join("/dev", device.name)
+        mountpath = join(
+            mountdir, device.env.get("ID_FS_UUID", devpath[-1])[:6]
+        )
         mountoptions = " ".join(config.mountoptions.split())
         hookspath = join(mountpath, ".ebsmount")
 
-        filesystem = device.env.get('ID_FS_TYPE', None)
+        filesystem = device.env.get("ID_FS_TYPE", None)
         if not filesystem:
             log(devname, f"could not identify filesystem: {devpath}")
             continue
 
         if filesystem not in config.filesystems.split():
-            log(devname,
+            log(
+                devname,
                 f"invalid filesystem: {filesystem}, encountered while"
-                f" adding {devpath}")
+                f" adding {devpath}",
+            )
             continue
 
         if is_mounted(devpath):
@@ -73,19 +77,25 @@ def ebsmount_add(devname, mountdir):
                     log(devname, f"skipping hook: '{file}', not executable")
                     continue
 
-                if (not os.stat(fpath).st_uid == 0 or
-                        not os.stat(fpath).st_gid == 0):
-                    log(devname,
-                        f"skipping hook: '{file}', not owned root:root")
+                if (
+                    not os.stat(fpath).st_uid == 0
+                    or not os.stat(fpath).st_gid == 0
+                ):
+                    log(
+                        devname, f"skipping hook: '{file}', not owned root:root"
+                    )
                     continue
 
                 log(devname, f"executing hook: {file}")
-                os.environ['HOME'] = pwd.getpwuid(os.getuid()).pw_dir
-                os.environ['MOUNTPOINT'] = mountpath
-                proc = subprocess.run(['/bin/bash', '--login', '-c', fpath],
-                                      stderr=STDOUT, stdout=PIPE, check=True)
-                subprocess.run(['tee', '-a', config.logfile],
-                               input=proc.stdout)
+                os.environ["HOME"] = pwd.getpwuid(os.getuid()).pw_dir
+                os.environ["MOUNTPOINT"] = mountpath
+                proc = subprocess.run(
+                    ["/bin/bash", "--login", "-c", fpath],
+                    stderr=STDOUT,
+                    stdout=PIPE,
+                    check=True,
+                )
+                subprocess.run(["tee", "-a", config.logfile], input=proc.stdout)
 
 
 def ebsmount_remove(devname, mountdir):
@@ -95,9 +105,9 @@ def ebsmount_remove(devname, mountdir):
     try:
         for d in os.listdir(mountdir):
             path = join(mountdir, d)
-            print(f'checking path: {path}')
+            print(f"checking path: {path}")
             if is_mounted(path):
-                print(f'path mounted: {path}')
+                print(f"path mounted: {path}")
                 mounted = True
                 continue
             os.rmdir(path)

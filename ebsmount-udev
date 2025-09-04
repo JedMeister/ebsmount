@@ -49,37 +49,35 @@ def _expected_devpath(devpath, devpaths):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        prog='ebsmount-udev',
+        prog="ebsmount-udev",
         description="EBS Mount - triggered by udev on EBS attach and detach",
-        epilog=ENVVARS
+        epilog=ENVVARS,
     )
     parser.add_argument(
-        'action',
-        choices=["add", "remove"],
-        help="action trigger"
+        "action", choices=["add", "remove"], help="action trigger"
     )
     args = parser.parse_args()
 
     if not config.enabled.lower() == "true":
-        fatal(f'ebsmount is not enabled ({config.CONF_FILE})')
+        fatal(f"ebsmount is not enabled ({config.CONF_FILE})")
 
-    devname = os.getenv('DEVNAME', None)
-    devpath = os.getenv('PHYSDEVPATH', os.getenv('DEVPATH', None))
+    devname = os.getenv("DEVNAME", None)
+    devpath = os.getenv("PHYSDEVPATH", os.getenv("DEVPATH", None))
 
     if not devname:
-        raise parser.error('DEVNAME is required')
+        raise parser.error("DEVNAME is required")
 
     # it seems that these may not be needed?!
-    #if not devpath:
+    # if not devpath:
     #    raise parser.error('PHYSDEVPATH or DEVPATH is required')
 
-    #if not _expected_devpath(devpath, config.devpaths.split()):
+    # if not _expected_devpath(devpath, config.devpaths.split()):
     #    raise parser.error(
     #            'PHYSDEVPATH/DEVPATH is not of the expected structure')
 
     # log trigger
     log(devname, f"received {args.action} trigger")
-    func = getattr(ebsmount, 'ebsmount_' + args.action)
+    func = getattr(ebsmount, "ebsmount_" + args.action)
     func(devname, config.mountdir)
 
 

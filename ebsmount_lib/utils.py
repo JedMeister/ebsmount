@@ -22,9 +22,16 @@ from conffile import ConfFile
 
 
 class EBSMountConf(ConfFile):
-    CONF_FILE = '/etc/ebsmount.conf'
-    REQUIRED = ['enabled', 'runhooks', 'mountdir', 'mountoptions',
-                'filesystems', 'logfile', 'devpaths']
+    CONF_FILE = "/etc/ebsmount.conf"
+    REQUIRED = [
+        "enabled",
+        "runhooks",
+        "mountdir",
+        "mountoptions",
+        "filesystems",
+        "logfile",
+        "devpaths",
+    ]
 
 
 config = EBSMountConf()
@@ -32,7 +39,7 @@ config = EBSMountConf()
 
 def log(devname, s):
     entry = f"{devname}: {s}"
-    with open(config.logfile, 'a') as fob:
+    with open(config.logfile, "a") as fob:
         fob.write(entry + "\n")
     print(entry)
 
@@ -46,7 +53,7 @@ def mkdir_parents(path, mode=0o777):
     """mkdir 'path' recursively (I.e., equivalent to mkdir -p)"""
     dirs = path.split("/")
     for i in range(2, len(dirs) + 1):
-        dir = "/".join(dirs[:i+1])
+        dir = "/".join(dirs[: i + 1])
         if os.path.isdir(dir):
             continue
 
@@ -62,16 +69,24 @@ def is_mounted(path):
     return False
 
 
-def mount(devpath, mountpath, options=''):
+def mount(devpath, mountpath, options=""):
     """mount devpath to mountpath with specified options (creates mountpath)"""
     if not os.path.exists(mountpath):
         mkdir_parents(mountpath)
 
     if options:
-        proc = subprocess.run(["systemd-mount", "-o", options, devpath, mountpath],
-                              stderr=STDOUT, stdout=PIPE, text=True)
+        proc = subprocess.run(
+            ["systemd-mount", "-o", options, devpath, mountpath],
+            stderr=STDOUT,
+            stdout=PIPE,
+            text=True,
+        )
     else:
-        proc = subprocess.run(["systemd-mount", devpath, mountpath],
-                              stderr=STDOUT, stdout=PIPE, text=True)
+        proc = subprocess.run(
+            ["systemd-mount", devpath, mountpath],
+            stderr=STDOUT,
+            stdout=PIPE,
+            text=True,
+        )
     if proc.returncode != 0:
-        print(f'An error occurred when mounting:\n{proc.stdout}')
+        print(f"An error occurred when mounting:\n{proc.stdout}")

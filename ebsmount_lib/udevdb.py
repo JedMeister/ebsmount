@@ -20,9 +20,10 @@ from subprocess import PIPE, STDOUT
 
 class Device:
     """class to hold device information enumerated from udev database"""
+
     def __init__(self, s, volinfo=True):
-        self.path = ''
-        self.name = ''
+        self.path = ""
+        self.name = ""
         self.symlinks = []
         self.env = {}
 
@@ -32,7 +33,7 @@ class Device:
 
     def _parse_raw_data(self, s):
         for entry in s.splitlines():
-            type, value = entry.split(':', 1)
+            type, value = entry.split(":", 1)
             type = type.strip()
             value = value.strip()
 
@@ -53,9 +54,12 @@ class Device:
                 self.env[name] = val.lstrip("=")
 
     def _get_volinfo(self):
-        if 'DEVTYPE' in self.env and self.env['DEVTYPE'] == 'disk':
-            proc = subprocess.run(["blkid", '-o', 'udev', f"/dev/{self.name}"],
-                                  capture_output=True, text=True)
+        if "DEVTYPE" in self.env and self.env["DEVTYPE"] == "disk":
+            proc = subprocess.run(
+                ["blkid", "-o", "udev", f"/dev/{self.name}"],
+                capture_output=True,
+                text=True,
+            )
             if proc.returncode != 0:
                 return
             volume_info = proc.stdout
@@ -73,8 +77,8 @@ class Device:
 
 def query(device=None, volinfo=True):
     """query udev database and return device(s) information
-       if no device is specified, all devices will be returned
-       optionally query volume info (vol_id) on disk devices
+    if no device is specified, all devices will be returned
+    optionally query volume info (vol_id) on disk devices
     """
     if device:
         cmd = ["udevadm", "info", "--query", "all", "--name", device]
@@ -83,7 +87,7 @@ def query(device=None, volinfo=True):
 
     devices = []
     output = subprocess.run(cmd, stdout=PIPE, stderr=STDOUT, text=True).stdout
-    for s in output.split('\n\n'):
+    for s in output.split("\n\n"):
         devices.append(Device(s, volinfo))
 
     return devices
@@ -93,8 +97,8 @@ def _disk_devices():
     """debug/test method to print disk devices"""
     devices = query()
     for dev in devices:
-        if 'DEVTYPE' in dev.env and dev.env['DEVTYPE'] == 'disk':
-            print('/dev/' + dev.name)
+        if "DEVTYPE" in dev.env and dev.env["DEVTYPE"] == "disk":
+            print("/dev/" + dev.name)
 
             attrs = list(dev.env.keys())
             attrs.sort()
